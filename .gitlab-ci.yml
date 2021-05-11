@@ -1,0 +1,24 @@
+stages: 
+    - test
+    - build
+
+variables:
+  MAVEN_CLI_OPTS: "--show-version"
+
+cache:
+  paths:
+  - .m2/repository
+
+
+image: maven:3.6.3-jdk-11
+
+testing:
+    image: 
+    stage: test
+    script: 
+        - mvn versions:set -DnewVersion=$CI_COMMIT_TAG
+        - mvn $MAVEN_CLI_OPTS clean test
+    tags:
+        - kubernetes
+    only:
+        - /-release/
