@@ -57,8 +57,10 @@ docker-publish:
     DOCKER_HOST: unix:///var/run/docker.sock
     DOCKER_DRIVER: overlay2
   before_script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+    - cat ${REGISTRY_PASSWORD} | docker login --username ${REGISTRY_USERNAME} --password-stdin ${REGISTRY_PUSH_URL}
+    - cat ${REGISTRY_PASSWORD} | docker login --username ${REGISTRY_USERNAME} --password-stdin ${REGISTRY_PULL_URL}
   script:
+    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
     - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
   only:
     - /-release/
