@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-spring-example
+spec:
+  selector:
+    matchLabels:
+      app: k8s-spring-example
+      env: testing
+  template:
+    metadata:
+      labels:
+        app: k8s-spring-example
+        env: testing
+    spec:
+      containers:
+        - name: k8s-spring-example
+          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:2021.05.17.14.33-release
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-spring-example
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: k8s-spring-example
+  selector:
+    app: k8s-spring-example
+  type: NodePort
+
+
