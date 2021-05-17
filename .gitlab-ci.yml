@@ -53,17 +53,8 @@ building:
 
 docker-publish:
   stage: publish
-  services:
-    - name: docker:18.09-dind
-      entrypoint: ["dockerd-entrypoint.sh"]
-      # TODO variable `--insecure-registry` cant be inject as variable
-      command: [
-          "--insecure-registry=tabeldata.ip-dynamic.com:8087",
-          "--insecure-registry=tabeldata.ip-dynamic.com:8088"
-      ]
-      alias: dockerd
   variables:
-    DOCKER_HOST: tcp://dockerd:2375
+    DOCKER_HOST: unix:///var/run/docker.sock
     DOCKER_DRIVER: overlay2
   before_script:
     - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
