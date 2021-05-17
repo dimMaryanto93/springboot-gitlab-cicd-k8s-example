@@ -1,0 +1,33 @@
+server:
+  port: 8080
+spring:
+  mvc:
+    dispatch-options-request: true
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:k8s_spring_example}
+    username: ${DATABASE_USER:k8s_spring_example}
+    password: ${DATABASE_PASSWORD:k8s_spring_example}
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL95Dialect
+        enable_lazy_load_no_trans: true
+        id:
+          new_generator_mappings: false
+        current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+        globally_quoted_identifiers: true
+        temp:
+          use_jdbc_metadata_defaults: false
+  flyway:
+    encoding: UTF-8
+    enabled: ${FLYWAY_ENABLED:true}
+    baseline-on-migrate: true
+    check-location: true
+    locations: classpath:/db/migration
+    clean-disabled: false
+    clean-on-validation-error: true
+    connect-retries: 2
