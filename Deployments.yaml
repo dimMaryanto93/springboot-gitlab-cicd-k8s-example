@@ -15,9 +15,31 @@ spec:
     spec:
       containers:
         - name: k8s-spring-example
-          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:2021.05.17.14.33-release
+          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:2021.05.17.15.35-release
           ports:
             - containerPort: 8080
+          env:
+            - name: DATABASE_HOST
+              value: "k8s-postgres-example"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "k8s_spring_example"
+            - name: DATABASE_USER
+              value: "k8s_spring_example"
+            - name: DATABASE_PASSWORD
+              value: "k8s_spring_example"
+        - name: k8s-postgres-example
+          image: 192.168.100.250:8088/postgres:12.3
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "k8s_spring_example"
+            - name: POSTGRES_USER
+              value: "k8s_spring_example"
+            - name: POSTGRES_DB
+              value: "k8s_spring_example"
 ---
 apiVersion: v1
 kind: Service
@@ -31,5 +53,16 @@ spec:
   selector:
     app: k8s-spring-example
   type: NodePort
-
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-postgres-example
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: k8s-postgres-example
+  selector:
+    app: k8s-spring-example
+  type: ClusterIP
