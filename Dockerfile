@@ -7,7 +7,6 @@ EXPOSE 8080
 
 ARG JAR_FILE
 ADD target/${JAR_FILE} /usr/share/applications/application.jar
-
-ADD target/classes/application.yml /usr/share/applications/application.yml
+ADD target/classes/application.yml /usr/share/applications/application.yaml
 
 VOLUME /usr/share/applications/
