@@ -16,9 +16,9 @@
 
     <properties>
         <java.version>11</java.version>
-        <docker-registry.group>spring-boot/archetype</docker-registry.group>
-        <docker-registry.host.push>tabeldata.ip-dynamic.com:8087</docker-registry.host.push>
-        <docker-registry.host.pull>tabeldata.ip-dynamic.com:8086</docker-registry.host.pull>
+        <docker-registry.group>spring-boot/k8s-example</docker-registry.group>
+        <docker-registry.host.push>192.168.100.250:8087</docker-registry.host.push>
+        <docker-registry.host.pull>192.168.100.250:8086</docker-registry.host.pull>
         <docker-maven-plugin.version>1.1.1</docker-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
     </properties>
