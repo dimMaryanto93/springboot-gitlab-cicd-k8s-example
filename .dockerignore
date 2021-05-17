@@ -1,7 +1,5 @@
 ### Maven template
-src/*
-!target/*.jar
-target/**
+src/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
