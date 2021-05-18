@@ -83,7 +83,7 @@ image: maven:3.6.3-jdk-11
 deploy_k8s:
   image:
     name: bitnami/kubectl:1.21.0
-    entrypoint: [""]
+    entrypoint: ["bash"]
   stage: deploy
   tags:
     - kubernetes
