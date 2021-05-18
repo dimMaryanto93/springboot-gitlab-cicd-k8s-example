@@ -82,7 +82,7 @@ image: maven:3.6.3-jdk-11
 
 deploy_k8s:
   image:
-    name: bitnami/kubectl:1.21.0
+    name: 192.168.100.250:8087/bitnami/kubectl:1.21.debian-10
     entrypoint: ["bash"]
   stage: deploy
   tags:
