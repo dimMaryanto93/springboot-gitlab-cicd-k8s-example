@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: k8s-spring-example
-          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:2021.05.18.10.13-release
+          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:IMAGE_TAG
           ports:
             - containerPort: 8080
           env:
