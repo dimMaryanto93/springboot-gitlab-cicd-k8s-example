@@ -95,3 +95,7 @@ deploy_k8s:
     - kubectl apply -f deployment.yaml
   only:
     - /-release/
+  environment:
+    name: development
+    kubernetes:
+      namespace: gitlab-managed-apps
