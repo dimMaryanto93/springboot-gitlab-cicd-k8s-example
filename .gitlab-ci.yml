@@ -96,6 +96,5 @@ deploy_k8s:
   only:
     - /-release/
   environment:
-    name: development
     kubernetes:
       namespace: gitlab-managed-apps
