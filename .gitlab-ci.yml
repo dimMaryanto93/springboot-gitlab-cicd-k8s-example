@@ -13,67 +13,85 @@ cache:
 
 image: maven:3.6.3-jdk-11
 
-testing:
-  stage: test
-  services:
-    - name: postgres:12.3
-      alias: spring-k8s-example
-  variables:
-    POSTGRES_DB: testing
-    POSTGRES_USER: testing
-    POSTGRES_PASSWORD: testing
-    DATABASE_HOST: spring-k8s-example
-    DATABASE_USER: $POSTGRES_USER
-    DATABASE_PASSWORD: $POSTGRES_PASSWORD
-    DATABASE_NAME: $POSTGRES_DB
-    DATABASE_PORT: 5432
-  script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS clean test
-  tags:
-    - kubernetes
-  only:
-    - /-release/
-
-building:
-  stage: build
-  before_script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-  script:
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
-  only:
-    - /-release/
-  tags:
-    - kubernetes
-  artifacts:
-    paths:
-      - target/*.jar
-      - src/main/docker/
-    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
-
-docker-publish:
-  stage: publish
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-    DOCKER_DRIVER: overlay2
-  script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
-  only:
-    - /-release/
-  tags:
-    - kubernetes
+#testing:
+#  stage: test
+#  services:
+#    - name: postgres:12.3
+#      alias: spring-k8s-example
+#  variables:
+#    POSTGRES_DB: testing
+#    POSTGRES_USER: testing
+#    POSTGRES_PASSWORD: testing
+#    DATABASE_HOST: spring-k8s-example
+#    DATABASE_USER: $POSTGRES_USER
+#    DATABASE_PASSWORD: $POSTGRES_PASSWORD
+#    DATABASE_NAME: $POSTGRES_DB
+#    DATABASE_PORT: 5432
+#  script:
+#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS clean test
+#  tags:
+#    - kubernetes
+#  only:
+#    - /-release/
+#
+#building:
+#  stage: build
+#  before_script:
+#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#  script:
+#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
+#  only:
+#    - /-release/
+#  tags:
+#    - kubernetes
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#      - src/main/docker/
+#    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
+#
+#docker-publish:
+#  stage: publish
+#  variables:
+#    DOCKER_HOST: unix:///var/run/docker.sock
+#    DOCKER_DRIVER: overlay2
+#  script:
+#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
+#  only:
+#    - /-release/
+#  tags:
+#    - kubernetes
+#
+#deploy_k8s:
+#  image:
+#    name: bitnami/kubectl:1.21.0
+#    entrypoint: [""]
+#  stage: deploy
+#  tags:
+#    - kubernetes
+#  before_script:
+#    - export KUBECONFIG=$KUBE_CONFIG
+#    - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
+#    - cat deployment.yaml
+#  script:
+#    - /opt/bitnami/kubectl/bin/kubectl apply -f deployment.yaml
+#  only:
+#    - /-release/
 
 deploy_k8s:
-  image: bitnami/kubectl:1.21.0
+  image:
+    name: bitnami/kubectl:1.21.0
+    entrypoint: [""]
   stage: deploy
   tags:
     - kubernetes
-  before_script: 
-    - export KUBECONFIG=$KUBE_CONFIG
-    - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
-    - cat deployment.yaml
+#  before_script:
+#    - export KUBECONFIG=$KUBE_CONFIG
+#    - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
+#    - cat deployment.yaml
   script:
-    - /opt/bitnami/kubectl/bin/kubectl apply -f deployment.yaml
+    - kubectl apply -f deployment.yaml
   only:
     - /-release/
