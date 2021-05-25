@@ -86,8 +86,6 @@ deploy_k8s:
     on_stop: stop_review
   only:
     - /-release/
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
 
 stop_review:
   image:
@@ -104,6 +102,3 @@ stop_review:
   environment:
     name: review/$CI_COMMIT_REF_NAME
     action: stop
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: manual
