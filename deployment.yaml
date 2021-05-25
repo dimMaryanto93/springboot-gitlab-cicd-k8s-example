@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: k8s-spring-example
+  annotations:
+    app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+    app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
 spec:
   selector:
     matchLabels:
@@ -12,6 +15,9 @@ spec:
       labels:
         app: k8s-spring-example
         env: testing
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
     spec:
       containers:
         - name: k8s-spring-example
