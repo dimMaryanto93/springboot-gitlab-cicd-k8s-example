@@ -14,67 +14,89 @@ cache:
 
 image: 192.168.100.250:8088/maven:3.6.3-jdk-11
 
-testing:
-  stage: test
-  services:
-    - name: postgres:12.3
-      alias: spring-k8s-example
-  variables:
-    POSTGRES_DB: testing
-    POSTGRES_USER: testing
-    POSTGRES_PASSWORD: testing
-    DATABASE_HOST: spring-k8s-example
-    DATABASE_USER: $POSTGRES_USER
-    DATABASE_PASSWORD: $POSTGRES_PASSWORD
-    DATABASE_NAME: $POSTGRES_DB
-    DATABASE_PORT: 5432
-  script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS clean test
-  tags:
-    - kubernetes
-  only:
-    - /-release/
+# testing:
+#   stage: test
+#   services:
+#     - name: postgres:12.3
+#       alias: spring-k8s-example
+#   variables:
+#     POSTGRES_DB: testing
+#     POSTGRES_USER: testing
+#     POSTGRES_PASSWORD: testing
+#     DATABASE_HOST: spring-k8s-example
+#     DATABASE_USER: $POSTGRES_USER
+#     DATABASE_PASSWORD: $POSTGRES_PASSWORD
+#     DATABASE_NAME: $POSTGRES_DB
+#     DATABASE_PORT: 5432
+#   script:
+#     - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#     - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS clean test
+#   tags:
+#     - kubernetes
+#   only:
+#     - /-release/
 
-building:
-  stage: build
-  before_script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-  script:
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
-  only:
-    - /-release/
-  tags:
-    - kubernetes
-  artifacts:
-    paths:
-      - target/*.jar
-      - src/main/docker/
-    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
+# building:
+#   stage: build
+#   before_script:
+#     - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#   script:
+#     - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
+#   only:
+#     - /-release/
+#   tags:
+#     - kubernetes
+#   artifacts:
+#     paths:
+#       - target/*.jar
+#       - src/main/docker/
+#     name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
 
-docker-publish:
-  stage: publish
-  services:
-    - name: 192.168.100.250:8088/docker:18.09-dind
-      # Enabled insecure registry into docker inside docker
-      entrypoint: ["dockerd-entrypoint.sh"]
-      # TODO variable `--insecure-registry` cant be inject as variable
-      command: [
-        "--insecure-registry=192.168.100.250:8087",
-        "--insecure-registry=192.168.100.250:8088"
-      ]
-      alias: dockerd
-  variables:
-      # modified file /etc/hosts inside docker container
-      DOCKER_HOST: tcp://dockerd:2375
-      DOCKER_DRIVER: overlay2
-  script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
-  only:
-    - /-release/
-  tags:
-    - kubernetes
+# docker-publish:
+#   stage: publish
+#   services:
+#     - name: 192.168.100.250:8088/docker:18.09-dind
+#       # Enabled insecure registry into docker inside docker
+#       entrypoint: ["dockerd-entrypoint.sh"]
+#       # TODO variable `--insecure-registry` cant be inject as variable
+#       command: [
+#         "--insecure-registry=192.168.100.250:8087",
+#         "--insecure-registry=192.168.100.250:8088"
+#       ]
+#       alias: dockerd
+#   variables:
+#       # modified file /etc/hosts inside docker container
+#       DOCKER_HOST: tcp://dockerd:2375
+#       DOCKER_DRIVER: overlay2
+#   script:
+#     - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_COMMIT_TAG
+#     - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
+#   only:
+#     - /-release/
+#   tags:
+#     - kubernetes
+
+# deploy_k8s:
+#   image:
+#     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+#   stage: deploy
+#   tags:
+#     - kubernetes
+#   before_script:
+#     - mkdir -p ~/.kube && cat $KUBE_CONFIG > ~/.kube/config
+#     - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
+#     - cat deployment.yaml
+#   script:
+#     - kubectl apply -f deployment.yaml
+#   after_script:
+#     - kubectl get deploy,service,pods -n gitlab-managed-apps -o wide
+#   environment:
+#     name: review/$CI_COMMIT_REF_NAME
+#     url: https://$CI_ENVIRONMENT_SLUG.tabeldata.ip-dynamic.com
+#     kubernetes:
+#       namespace: backend
+#   only:
+#     - /-release/
 
 deploy_k8s:
   image:
@@ -82,18 +104,12 @@ deploy_k8s:
   stage: deploy
   tags:
     - kubernetes
-  before_script:
-    - mkdir -p ~/.kube && cat $KUBE_CONFIG > ~/.kube/config
-    - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
-    - cat deployment.yaml
   script:
-    - kubectl apply -f deployment.yaml
-  after_script:
-    - kubectl get deploy,service,pods -n gitlab-managed-apps -o wide
+    - echo "Deploy to production server"
   environment:
     name: review/$CI_COMMIT_REF_NAME
-    url: https://$CI_ENVIRONMENT_SLUG.tabeldata.ip-dynamic.com
+    url: https://$CI_ENVIRONMENT_SLUG.192.168.100.251
     kubernetes:
-      namespace: backend
+      namespace: example
   only:
     - /-release/
