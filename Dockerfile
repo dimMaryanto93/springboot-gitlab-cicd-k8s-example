@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM 192.168.100.250:8088/openjdk:11-jre
 MAINTAINER Dimas Maryanto <software.dimas_m@icloud.com>
 
 ENTRYPOINT ["java", "-jar", "-Djava.security.egd=file:/dev/./urandom", "/usr/share/applications/application.jar"]
