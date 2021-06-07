@@ -81,6 +81,8 @@ review_apps:
   image:
     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
   stage: review
+  tags:
+    - kubernetes
   environment:
     name: review/$CI_COMMIT_REF_SLUG
   before_script:
