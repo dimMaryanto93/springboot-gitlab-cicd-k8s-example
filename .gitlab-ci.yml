@@ -6,6 +6,7 @@ stages:
 
 variables:
   MAVEN_CLI_OPTS: "--show-version"
+  DOCKER_TLS_CERTDIR: ""
 
 cache:
   paths:
