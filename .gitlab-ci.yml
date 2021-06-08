@@ -85,8 +85,6 @@ review_apps:
     - kubernetes
   environment:
     name: review/$CI_COMMIT_REF_SLUG
-    kubernetes:
-      namespace: $CI_PROJECT_NAME
   before_script:
   #  - mkdir -p ~/.kube && cat $KUBE_CONFIG > ~/.kube/config
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
