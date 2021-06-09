@@ -99,8 +99,6 @@ review_apps:
     - kubectl get deploy,service,pod -n $KUBE_NAMESPACE -o wide
   only:
     - /-release/
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
 
 stop_review_apps:
   image:
@@ -121,6 +119,3 @@ stop_review_apps:
     - kubectl delete -f deployment.yaml -n $KUBE_NAMESPACE
   only:
     - /-release/
-  rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: manual
