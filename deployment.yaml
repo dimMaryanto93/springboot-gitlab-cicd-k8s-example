@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: CI_PROJECT_NAME
+  name: CI_PROJECT_PATH_SLUG
   annotations:
     app.gitlab.com/app: CI_PROJECT_PATH_SLUG
     app.gitlab.com/env: CI_ENVIRONMENT_SLUG
 spec:
   selector:
     matchLabels:
-      app: CI_PROJECT_NAME
-      env: CI_ENVIRONMENT_NAME
+      app: CI_PROJECT_PATH_SLUG
+      env: CI_ENVIRONMENT_SLUG
   template:
     metadata:
       labels:
-        app: CI_PROJECT_NAME
-        env: CI_ENVIRONMENT_NAME
+        app: CI_PROJECT_PATH_SLUG
+        env: CI_ENVIRONMENT_SLUG
       annotations:
         app.gitlab.com/app: CI_PROJECT_PATH_SLUG
         app.gitlab.com/env: CI_ENVIRONMENT_SLUG
     spec:
       containers:
-        - name: CI_PROJECT_NAME
+        - name: CI_PROJECT_PATH_SLUG
           image: IMAGE_NAME:IMAGE_TAG
           ports:
             - containerPort: 8080
@@ -50,15 +50,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: CI_PROJECT_NAME
+  name: CI_PROJECT_PATH_SLUG
 spec:
   ports:
     - port: 8080
       targetPort: 8080
-      name: CI_PROJECT_NAME
+      name: CI_PROJECT_PATH_SLUG
   selector:
-    app: CI_PROJECT_NAME
-    env: CI_ENVIRONMENT_NAME
+    app: CI_PROJECT_PATH_SLUG
+    env: CI_ENVIRONMENT_SLUG
   type: NodePort
 ---
 apiVersion: v1
@@ -71,6 +71,6 @@ spec:
       targetPort: 5432
       name: k8s-postgres-example
   selector:
-    app: CI_PROJECT_NAME
-    env: CI_ENVIRONMENT_NAME
+    app: CI_PROJECT_PATH_SLUG
+    env: CI_ENVIRONMENT_SLUG
   type: ClusterIP
