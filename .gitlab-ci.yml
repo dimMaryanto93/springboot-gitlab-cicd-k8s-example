@@ -85,6 +85,8 @@ review_apps:
     - kubernetes
   environment:
     name: review/$CI_COMMIT_REF_SLUG
+    on_stop: stop_review_apps
+    auto_stop_in: 1 week
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
     - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
@@ -97,3 +99,28 @@ review_apps:
     - kubectl get deploy,service,pod -n $KUBE_NAMESPACE -o wide
   only:
     - /-release/
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+
+stop_review_apps:
+  image:
+    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+  stage: deploy
+  tags:
+    - kubernetes
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  before_script:
+    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
+    - sed -i "s/IMAGE_TAG/$CI_COMMIT_TAG/g" deployment.yaml
+    - sed -i "s/CI_PROJECT_PATH_SLUG/$CI_PROJECT_PATH_SLUG/g" deployment.yaml
+    - sed -i "s/CI_ENVIRONMENT_SLUG/$CI_ENVIRONMENT_SLUG/g" deployment.yaml
+    - cat deployment.yaml
+  script:
+    - kubectl delete -f deployment.yaml -n $KUBE_NAMESPACE
+  only:
+    - /-release/
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
