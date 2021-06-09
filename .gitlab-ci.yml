@@ -103,6 +103,9 @@ review_apps:
   artifacts:
     reports:
       dotenv: deploy.env
+    paths:
+      - deployment.yaml
+    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
   only:
     - /-release/
 
