@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: CI_PROJECT_PATH_SLUG
-          image: IMAGE_NAME:IMAGE_TAG
+          image: 192.168.100.250:8088/spring-boot/k8s-example/springboot-k8s-example:IMAGE_TAG
           ports:
             - containerPort: 8080
           env:
