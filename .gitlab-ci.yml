@@ -102,7 +102,7 @@ review_apps:
     - kubectl apply -f deployment.yaml -n $KUBE_NAMESPACE
     - kubectl get deploy,service,pod -n $KUBE_NAMESPACE -o wide
   after_script:
-    - NODE_PORT_ENV=$(kubectl get service k8s-spring-example -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
+    - NODE_PORT_ENV=$(kubectl get service $CI_PROJECT_NAME -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
     - echo "NODE_PORT=$NODE_PORT_ENV" >> deploy.env
   artifacts:
     reports:
