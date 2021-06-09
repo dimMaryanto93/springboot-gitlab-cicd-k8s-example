@@ -86,6 +86,7 @@ review_apps:
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     on_stop: stop_review_apps
+    url: http://192.168.100.251:$DYNAMIC_ENVIRONMENT_URL
     auto_stop_in: 1 week
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
@@ -95,8 +96,13 @@ review_apps:
     - cat deployment.yaml
   script:
     - kubectl apply -f deployment.yaml -n $KUBE_NAMESPACE
-  after_script:
     - kubectl get deploy,service,pod -n $KUBE_NAMESPACE -o wide
+  after_script:
+    - NODE_PORT_ENV=$(kubectl get service k8s-spring-example -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
+    - echo "DYNAMIC_ENVIRONMENT_URL=$NODE_PORT_ENV" >> deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
   only:
     - /-release/
 
