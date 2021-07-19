@@ -6,11 +6,11 @@ Pertama, create project misalnya dengan nama `springboot-gitlab-cicd-k8s-example
 
 Kemudian ke menu `Infrastructure -> Kubernetes cluster -> Integrate with a cluster certificate` seperti berikut:
 
-![integrate-cluster](images/01-integrate-cluster.png)
+![integrate-cluster](images/gitlab-integration/01-integrate-cluster.png)
 
 Setelah itu pilih `Connect existing cluster` seperti berikut:
 
-![connect-exist-cluster](images/02-connect-existing.png)
+![connect-exist-cluster](images/gitlab-integration/02-connect-existing.png)
  
 Kemudian isi fieldnya sesuai dengan kubernetes cluster.
 
@@ -22,11 +22,11 @@ Kemudian isi fieldnya sesuai dengan kubernetes cluster.
 
 Jika sudah maka hasilnya, seperti berikut:
 
-![cluster-registered](images/03-cluster-registered.png)
+![cluster-registered](images/gitlab-integration/03-cluster-registered.png)
 
 Setelah itu set `Settings -> CI/CD -> Variables` seperti berikut:
 
-![cicd-variables](images/04-cicd-variables.png)
+![cicd-variables](images/gitlab-integration/04-cicd-variables.png)
 
 CI/CD Variables description:
 
@@ -52,6 +52,4 @@ CI/CD Variables description:
     Type: "File"
     Environtment scope: "All"
 ```
-    
-
 
