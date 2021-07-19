@@ -1,7 +1,9 @@
 stages:
   - test
+  - quality-control
   - build
   - publish
+  - performances
   - review
   - deploy
 
@@ -12,6 +14,7 @@ variables:
   CI_REGISTRY_NAMESPACE: "example/k8s-gitlab-cicd"
   CI_IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
   MAVEN_CLI_OPTS: "--show-version -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Ddocker-registry-image=${CI_REGISTRY_IMAGE} -Ddocker-registry-host-push=${CI_REGISTRY} -Ddocker-registry-host-pull=${CI_REGISTRY_PULL} -Ddocker-registry-group=${CI_REGISTRY_NAMESPACE}"
+  NODE_CLUSTER_IP: "192.168.88.120"
 
 cache:
   paths:
@@ -56,102 +59,75 @@ image: $CI_REGISTRY_PULL/maven:3.6.3-jdk-11
 #      - target/*.jar
 #    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
 
-#docker-publish:
-#  stage: publish
-#  services:
-#    - name: $CI_REGISTRY_PULL/docker:18.09-dind
-#      # Enabled insecure registry into docker inside docker
-#      entrypoint: [ "dockerd-entrypoint.sh" ]
-#      # TODO changed variable `--insecure-registry`
-#      command: [
-#          "--insecure-registry=repository.dimas-maryanto.com:8087",
-#          "--insecure-registry=repository.dimas-maryanto.com:8086"
-#      ]
-#      alias: dockerd
-#  variables:
-#    # modified file /etc/hosts inside docker container
-#    DOCKER_HOST: tcp://dockerd:2375
-#    DOCKER_DRIVER: overlay2
-#  script:
-#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
-#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
-#  only:
-#    - /-release/
-#  tags:
-#    - docker
+docker-publish:
+  stage: publish
+  services:
+    - name: $CI_REGISTRY_PULL/docker:18.09-dind
+      # Enabled insecure registry into docker inside docker
+      entrypoint: [ "dockerd-entrypoint.sh" ]
+      # TODO changed variable `--insecure-registry`
+      command: [
+          "--insecure-registry=repository.dimas-maryanto.com:8087",
+          "--insecure-registry=repository.dimas-maryanto.com:8086"
+      ]
+      alias: dockerd
+  variables:
+    # modified file /etc/hosts inside docker container
+    DOCKER_HOST: tcp://dockerd:2375
+    DOCKER_DRIVER: overlay2
+  script:
+    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
+    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
+  only:
+    - /-release/
+  tags:
+    - docker
 
 review_apps:
   image:
     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
   stage: review
   tags:
-    - docker
+    - kubernetes
   environment:
     name: review/$CI_COMMIT_REF_SLUG
-    url: http://$NODE_CLUSTER_IP:$NODE_PORT
+    on_stop: stop_review_apps
+    url: http://NODE_CLUSTER_IP:$NODE_PORT
+    auto_stop_in: 1 week
   before_script:
+    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
     - sh .gitlab/runners/entrypoint.sh
+    - sh .gitlab/runners/regcred-entrypoint.sh
   script:
-    - cat src/main/kubernetes/deployment.yaml
-    - cat src/main/kubernetes/service.yaml
+    - kubectl apply -f src/main/kubernetes/deployment.yaml -n $KUBE_NAMESPACE
+    - kubectl apply -f src/main/kubernetes/service.yaml -n $KUBE_NAMESPACE
+  after_script:
+    - NODE_PORT_ENV=$(kubectl get service $CI_PROJECT_PATH_SLUG -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
+    - echo "NODE_PORT=$NODE_PORT_ENV" >> deploy.env
   artifacts:
+    reports:
+      dotenv: deploy.env
     paths:
       - src/main/kubernetes
     name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
   only:
     - /-release/
 
-#review_apps:
-#  image:
-#    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
-#  stage: deploy
-#  tags:
-#    - kubernetes
-#  environment:
-#    name: review/$CI_COMMIT_REF_SLUG
-#    on_stop: stop_review_apps
-#    url: http://192.168.100.251:$NODE_PORT
-#    auto_stop_in: 1 week
-#  before_script:
-#    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
-#    - sed -i "s|CI_IMAGE_TAG|$CI_IMAGE_VERSION|g" deployment.yaml && \
-#      sed -i "s|CI_IMAGE_NAME|$IMAGE_NAME|g" deployment.yaml && \
-#      sed -i "s|CI_PROJECT_PATH_SLUG|$CI_PROJECT_PATH_SLUG|g" deployment.yaml && \
-#      sed -i "s|CI_ENVIRONMENT_SLUG|$CI_ENVIRONMENT_SLUG|g" deployment.yaml
-#    - cat deployment.yaml
-#  script:
-#    - kubectl apply -f deployment.yaml -n $KUBE_NAMESPACE
-#    - kubectl get deploy,service,pod -n $KUBE_NAMESPACE -o wide
-#  after_script:
-#    - NODE_PORT_ENV=$(kubectl get service $CI_PROJECT_PATH_SLUG -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
-#    - echo "NODE_PORT=$NODE_PORT_ENV" >> deploy.env
-#  artifacts:
-#    reports:
-#      dotenv: deploy.env
-#    paths:
-#      - deployment.yaml
-#    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
-#  only:
-#    - /-release/
-#
-#stop_review_apps:
-#  image:
-#    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
-#  stage: deploy
-#  tags:
-#    - kubernetes
-#  environment:
-#    name: review/$CI_COMMIT_REF_SLUG
-#    action: stop
-#  when: manual
-#  before_script:
-#    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
-#    - sed -i "s|CI_IMAGE_TAG|$CI_COMMIT_TAG|g" deployment.yaml && \
-#      sed -i "s|CI_IMAGE_NAME|$IMAGE_NAME|g" deployment.yaml && \
-#      sed -i "s|CI_PROJECT_PATH_SLUG|$CI_PROJECT_PATH_SLUG|g" deployment.yaml && \
-#      sed -i "s|CI_ENVIRONMENT_SLUG|$CI_ENVIRONMENT_SLUG|g" deployment.yaml
-#    - cat deployment.yaml
-#  script:
-#    - kubectl delete -f deployment.yaml -n $KUBE_NAMESPACE
-#  only:
-#    - /-release/
+stop_review_apps:
+  image:
+    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+  stage: review
+  tags:
+    - kubernetes
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  when: manual
+  before_script:
+    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
+    - sh .gitlab/runners/entrypoint.sh
+  script:
+    - kubectl delete -f src/main/kubernetes/deployment.yaml -n $KUBE_NAMESPACE
+    - kubectl delete -f src/main/kubernetes/service.yaml -n $KUBE_NAMESPACE
+  only:
+    - /-release/
