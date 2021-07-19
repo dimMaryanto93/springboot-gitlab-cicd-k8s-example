@@ -7,8 +7,6 @@ stages:
 
 variables:
   DOCKER_TLS_CERTDIR: ""
-  CI_REGISTRY: "192.168.88.50:8087"
-  CI_REGISTRY_PULL: "192.168.88.50:8086"
   ## TODO change it, use common name you like!!!
   CI_REGISTRY_IMAGE: "springboot-example"
   CI_REGISTRY_NAMESPACE: "example/k8s-gitlab-cicd"
