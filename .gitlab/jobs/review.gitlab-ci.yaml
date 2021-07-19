@@ -9,7 +9,6 @@ review_apps:
     on_stop: stop_review_apps
     url: http://NODE_CLUSTER_IP:$NODE_PORT
     auto_stop_in: 1 week
-  in
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
     - sh .gitlab/runners/entrypoint.sh
