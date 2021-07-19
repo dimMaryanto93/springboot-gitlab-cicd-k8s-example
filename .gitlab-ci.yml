@@ -41,44 +41,65 @@ image: $CI_REGISTRY_PULL/maven:3.6.3-jdk-11
 #  only:
 #    - /-release/
 
-building:
-  stage: build
-  before_script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
-  script:
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
-  only:
-    - /-release/
+#building:
+#  stage: build
+#  before_script:
+#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
+#  script:
+#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS package -DskipTests
+#  only:
+#    - /-release/
+#  tags:
+#    - docker
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
+
+#docker-publish:
+#  stage: publish
+#  services:
+#    - name: $CI_REGISTRY_PULL/docker:18.09-dind
+#      # Enabled insecure registry into docker inside docker
+#      entrypoint: [ "dockerd-entrypoint.sh" ]
+#      # TODO changed variable `--insecure-registry`
+#      command: [
+#          "--insecure-registry=repository.dimas-maryanto.com:8087",
+#          "--insecure-registry=repository.dimas-maryanto.com:8086"
+#      ]
+#      alias: dockerd
+#  variables:
+#    # modified file /etc/hosts inside docker container
+#    DOCKER_HOST: tcp://dockerd:2375
+#    DOCKER_DRIVER: overlay2
+#  script:
+#    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
+#    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
+#  only:
+#    - /-release/
+#  tags:
+#    - docker
+
+review_apps:
+  image:
+    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+  stage: deploy
   tags:
     - docker
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: http://$NODE_CLUSTER_IP:$NODE_PORT
+  before_script:
+    - sh .gitlab/runners/entrypoint.sh
+  script:
+    - cat src/main/kubernetes/deployment.yaml
+    - cat src/main/kubernetes/service.yaml
   artifacts:
     paths:
-      - target/*.jar
+      - src/main/kubernetes
     name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
-
-docker-publish:
-  stage: publish
-  services:
-    - name: $CI_REGISTRY_PULL/docker:18.09-dind
-      # Enabled insecure registry into docker inside docker
-      entrypoint: [ "dockerd-entrypoint.sh" ]
-      # TODO changed variable `--insecure-registry`
-      command: [
-          "--insecure-registry=repository.dimas-maryanto.com:8087",
-          "--insecure-registry=repository.dimas-maryanto.com:8086"
-      ]
-      alias: dockerd
-  variables:
-    # modified file /etc/hosts inside docker container
-    DOCKER_HOST: tcp://dockerd:2375
-    DOCKER_DRIVER: overlay2
-  script:
-    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
-    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
   only:
     - /-release/
-  tags:
-    - docker
 
 #review_apps:
 #  image:

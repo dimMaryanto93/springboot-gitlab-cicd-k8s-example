@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${CI_PROJECT_PATH_SLUG}
+  annotations:
+    app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+    app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+spec:
+  selector:
+    matchLabels:
+      app: ${CI_PROJECT_PATH_SLUG}
+      env: ${CI_ENVIRONMENT_SLUG}
+  template:
+    metadata:
+      labels:
+        app: ${CI_PROJECT_PATH_SLUG}
+        env: ${CI_ENVIRONMENT_SLUG}
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+    spec:
+      containers:
+        - name: ${CI_PROJECT_PATH_SLUG}
+          image: ${CI_REGISTRY_IMAGE}/${CI_REGISTRY_NAMESPACE}/${CI_REGISTRY_IMAGE}:${CI_IMAGE_VERSION}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_HOST
+              value: "${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db"
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: "k8s_spring_example"
+            - name: DATABASE_USER
+              value: "k8s_spring_example"
+            - name: DATABASE_PASSWORD
+              value: "k8s_spring_example"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db
+  annotations:
+    app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+    app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+spec:
+  selector:
+    matchLabels:
+      app: ${CI_PROJECT_PATH_SLUG}
+      env: ${CI_ENVIRONMENT_SLUG}
+  template:
+    metadata:
+      labels:
+        app: ${CI_PROJECT_PATH_SLUG}
+        env: ${CI_ENVIRONMENT_SLUG}
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+    spec:
+      containers:
+        - name: ${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db
+          image: ${CI_REGISTRY_PULL}/postgres:12.6
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "k8s_spring_example"
+            - name: POSTGRES_USER
+              value: "k8s_spring_example"
+            - name: POSTGRES_DB
+              value: "k8s_spring_example"
+
