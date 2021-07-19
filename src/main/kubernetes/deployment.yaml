@@ -26,7 +26,7 @@ spec:
             - containerPort: 8080
           env:
             - name: DATABASE_HOST
-              value: "${CI_PROJECT_PATH_SLUG}-db"
+              value: "${CI_PROJECT_PATH_SLUG}-db.${KUBE_NAMESPACE}.svc.cluster.local"
             - name: DATABASE_PORT
               value: "5432"
             - name: DATABASE_NAME
