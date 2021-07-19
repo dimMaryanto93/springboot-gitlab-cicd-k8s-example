@@ -16,9 +16,10 @@
 
     <properties>
         <java.version>11</java.version>
-        <docker-registry.group>spring-boot/k8s-example</docker-registry.group>
-        <docker-registry.host.push>192.168.100.250:8087</docker-registry.host.push>
-        <docker-registry.host.pull>192.168.100.250:8086</docker-registry.host.pull>
+        <docker-registry-image>${project.artifactId}</docker-registry-image>
+        <docker-registry-group>example/k8s-springboot</docker-registry-group>
+        <docker-registry-host-push>192.168.88.50:8087</docker-registry-host-push>
+        <docker-registry-host-pull>192.168.88.50:8086</docker-registry-host-pull>
         <docker-maven-plugin.version>1.1.1</docker-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
     </properties>
@@ -98,10 +99,10 @@
                 <version>1.4.13</version>
                 <configuration>
                     <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-                    <repository>${docker-registry.host.push}/${docker-registry.group}/${project.artifactId}</repository>
+                    <repository>${docker-registry-host-push}/${docker-registry-group}/${docker-registry-image}</repository>
                     <tag>${project.version}</tag>
                     <buildArgs>
-                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                        <JAR_FILE>${project.build.finalName}.${project.packaging}</JAR_FILE>
                     </buildArgs>
                 </configuration>
             </plugin>
