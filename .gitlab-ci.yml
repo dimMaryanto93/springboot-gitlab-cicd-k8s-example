@@ -64,8 +64,8 @@ docker-publish:
       entrypoint: [ "dockerd-entrypoint.sh" ]
       # TODO changed variable `--insecure-registry`
       command: [
-          "--insecure-registry=${CI_REGISTRY}",
-          "--insecure-registry=${CI_REGISTRY_PULL}"
+          "--insecure-registry=repository.dimas-maryanto.com:8087",
+          "--insecure-registry=repository.dimas-maryanto.com:8086"
       ]
       alias: dockerd
   variables:
