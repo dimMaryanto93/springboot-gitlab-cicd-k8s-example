@@ -1,0 +1,23 @@
+docker-publish:
+  stage: publish
+  services:
+    - name: $CI_REGISTRY_PULL/docker:18.09-dind
+      # Enabled insecure registry into docker inside docker
+      entrypoint: [ "dockerd-entrypoint.sh" ]
+      # TODO changed variable `--insecure-registry`
+      command: [
+          "--insecure-registry=repository.dimas-maryanto.com:8087",
+          "--insecure-registry=repository.dimas-maryanto.com:8086"
+      ]
+      alias: dockerd
+  variables:
+    # modified file /etc/hosts inside docker container
+    DOCKER_HOST: tcp://dockerd:2375
+    DOCKER_DRIVER: overlay2
+  script:
+    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
+    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS -DskipTests package dockerfile:build dockerfile:push
+  only:
+    - /-release/
+  tags:
+    - docker
