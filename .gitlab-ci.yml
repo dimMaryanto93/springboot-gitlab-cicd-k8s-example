@@ -88,7 +88,7 @@ review_apps:
     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
   stage: review
   tags:
-    - kubernetes
+    - docker
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     on_stop: stop_review_apps
@@ -118,7 +118,7 @@ stop_review_apps:
     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
   stage: review
   tags:
-    - kubernetes
+    - docker
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     action: stop
