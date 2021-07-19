@@ -21,12 +21,12 @@ spec:
     spec:
       containers:
         - name: ${CI_PROJECT_PATH_SLUG}
-          image: ${CI_REGISTRY_IMAGE}/${CI_REGISTRY_NAMESPACE}/${CI_REGISTRY_IMAGE}:${CI_IMAGE_VERSION}
+          image: ${CI_REGISTRY}/${CI_REGISTRY_NAMESPACE}/${CI_REGISTRY_IMAGE}:${CI_IMAGE_VERSION}
           ports:
             - containerPort: 8080
           env:
             - name: DATABASE_HOST
-              value: "${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db"
+              value: "${CI_PROJECT_PATH_SLUG}-db"
             - name: DATABASE_PORT
               value: "5432"
             - name: DATABASE_NAME
@@ -39,7 +39,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db
+  name: ${CI_PROJECT_PATH_SLUG}-db
   annotations:
     app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
     app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
@@ -58,7 +58,7 @@ spec:
         app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
     spec:
       containers:
-        - name: ${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db
+        - name: ${CI_PROJECT_PATH_SLUG}-db
           image: ${CI_REGISTRY_PULL}/postgres:12.6
           ports:
             - containerPort: 5432

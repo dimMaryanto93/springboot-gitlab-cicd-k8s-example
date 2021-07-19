@@ -16,12 +16,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: k8s-postgres-example
+  name: ${CI_PROJECT_PATH_SLUG}-db
 spec:
   ports:
     - port: 5432
       targetPort: 5432
-      name: ${CI_PROJECT_PATH_SLUG}-${CI_ENVIRONMENT_SLUG}-db
+      name: ${CI_PROJECT_PATH_SLUG}-db
   selector:
     app: ${CI_PROJECT_PATH_SLUG}
     env: ${CI_ENVIRONMENT_SLUG}
