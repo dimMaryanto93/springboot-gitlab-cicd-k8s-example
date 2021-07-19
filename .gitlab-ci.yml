@@ -83,7 +83,7 @@ image: $CI_REGISTRY_PULL/maven:3.6.3-jdk-11
 review_apps:
   image:
     name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
-  stage: deploy
+  stage: review
   tags:
     - docker
   environment:
