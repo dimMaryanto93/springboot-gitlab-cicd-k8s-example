@@ -4,7 +4,6 @@ set -e
 mkdir -p .docker/
 cat $DOCKER_CONF_JSON > .docker/config.json
 
-export DOCKER_REGCRED="nexus-regcred"
 # shellcheck disable=SC2126
 # shellcheck disable=SC2155
 export NEXUS_REGCRED_IS_EXIST=$(kubectl get secret "$DOCKER_REGCRED" -n "$KUBE_NAMESPACE" -o json --ignore-not-found=true | grep "$DOCKER_REGCRED" | wc -l)

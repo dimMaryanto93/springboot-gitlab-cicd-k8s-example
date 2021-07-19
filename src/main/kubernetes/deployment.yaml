@@ -35,6 +35,8 @@ spec:
               value: "k8s_spring_example"
             - name: DATABASE_PASSWORD
               value: "k8s_spring_example"
+      imagePullSecrets:
+        - name: ${DOCKER_REGCRED}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,4 +71,5 @@ spec:
               value: "k8s_spring_example"
             - name: POSTGRES_DB
               value: "k8s_spring_example"
-
+      imagePullSecrets:
+        - name: ${DOCKER_REGCRED}
