@@ -1,10 +1,12 @@
 #!/bin/bash
 set -e
+export WORKING_DIRECTORY=src/main/kubernetes
+export DEPLOYMENT_FILE=$WORKING_DIRECTORY/deployment.yaml
+export SERVICE_FILE=$WORKING_DIRECTORY/service.yaml
 
-export DEPLOYMENT_FILE=src/main/kubernetes/deployment.yaml
-export SERVICE_FILE=src/main/kubernetes/service.yaml
-
-eval "echo \"$(cat ${DEPLOYMENT_FILE})\" > ${DEPLOYMENT_FILE}"
-eval "echo \"$(cat ${SERVICE_FILE})\" > ${SERVICE_FILE}"
+envsubst < DEPLOYMENT_FILE > deployment.yaml && \
+cat deployment.yaml
+envsubst < SERVICE_FILE > service.yaml && \
+cat service.yaml
 
 exec "$@"

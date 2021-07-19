@@ -28,6 +28,8 @@ Setelah itu set `Settings -> CI/CD -> Variables` seperti berikut:
 
 ![cicd-variables](images/04-cicd-variables.png)
 
+CI/CD Variables description:
+
 ```yaml
 - CI_REGISTRY:
     Value: "docker.io" # diisi dengan url docker registry atau insecure registry (hosted)

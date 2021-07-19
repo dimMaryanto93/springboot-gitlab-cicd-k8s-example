@@ -109,7 +109,8 @@ review_apps:
     reports:
       dotenv: deploy.env
     paths:
-      - src/main/kubernetes
+      - deployment.yaml
+      - service.yaml
     name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
   only:
     - /-release/
