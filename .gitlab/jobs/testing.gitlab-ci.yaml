@@ -1,0 +1,21 @@
+testing:
+  stage: test
+  services:
+    - name: postgres:12.3
+      alias: spring-k8s-example
+  variables:
+    POSTGRES_DB: testing
+    POSTGRES_USER: testing
+    POSTGRES_PASSWORD: testing
+    DATABASE_HOST: spring-k8s-example
+    DATABASE_USER: $POSTGRES_USER
+    DATABASE_PASSWORD: $POSTGRES_PASSWORD
+    DATABASE_NAME: $POSTGRES_DB
+    DATABASE_PORT: 5432
+  script:
+    - mvn -s $M2_SETTINGS_XML versions:set -DnewVersion=$CI_IMAGE_VERSION
+    - mvn -s $M2_SETTINGS_XML $MAVEN_CLI_OPTS clean test
+  tags:
+    - docker
+  only:
+    - /-release/
