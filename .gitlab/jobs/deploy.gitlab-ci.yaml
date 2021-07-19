@@ -1,15 +1,13 @@
-review_apps:
+deploying:
   image:
     name: $CI_REGISTRY_PULL/dimmaryanto93/k8s-kubectl-helm:1.21.1-release
-  stage: review
+  stage: deploy
   tags:
     - docker
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
-    on_stop: stop_review_apps
+    name: production
     url: http://NODE_CLUSTER_IP:$NODE_PORT
-    auto_stop_in: 1 week
-  in
+  when: manual
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
     - sh .gitlab/runners/entrypoint.sh

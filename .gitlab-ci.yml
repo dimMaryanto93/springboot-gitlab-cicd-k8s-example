@@ -28,3 +28,4 @@ include:
   - local: .gitlab/jobs/packaging.gitlab-ci.yaml
   - local: .gitlab/jobs/publish.gitlab-ci.yaml
   - local: .gitlab/jobs/review.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
+  - local: .gitlab/jobs/deploy.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
