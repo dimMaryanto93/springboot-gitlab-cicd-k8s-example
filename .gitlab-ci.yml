@@ -86,7 +86,7 @@ docker-publish:
 
 review_apps:
   image:
-    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+    name: dimmaryanto93/k8s-kubectl-helm:1.21.1-release
   stage: review
   tags:
     - docker
@@ -117,7 +117,7 @@ review_apps:
 
 stop_review_apps:
   image:
-    name: dimmaryanto93/k8s-kubectl-helm:1.21.0-release
+    name: dimmaryanto93/k8s-kubectl-helm:1.21.1-release
   stage: review
   tags:
     - docker
