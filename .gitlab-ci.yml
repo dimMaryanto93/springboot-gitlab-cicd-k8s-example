@@ -19,7 +19,7 @@ cache:
   paths:
     - .m2/repository
 
-image: $PRIVATE_PULL_REGISTRY/maven:3.6.3-jdk-11
+image: $CI_REGISTRY_PULL/maven:3.6.3-jdk-11
 
 #testing:
 #  stage: test
@@ -61,7 +61,7 @@ building:
 docker-publish:
   stage: publish
   services:
-    - name: $PRIVATE_PULL_REGISTRY/docker:18.09-dind
+    - name: $CI_REGISTRY_PULL/docker:18.09-dind
       # Enabled insecure registry into docker inside docker
       entrypoint: [ "dockerd-entrypoint.sh" ]
       # TODO changed variable `--insecure-registry`
