@@ -100,8 +100,8 @@ review_apps:
     - sh .gitlab/runners/entrypoint.sh
     - sh .gitlab/runners/regcred-entrypoint.sh
   script:
-    - kubectl apply -f src/main/kubernetes/deployment.yaml -n $KUBE_NAMESPACE
-    - kubectl apply -f src/main/kubernetes/service.yaml -n $KUBE_NAMESPACE
+    - kubectl apply -f .k8s/deployment.yaml -n $KUBE_NAMESPACE
+    - kubectl apply -f .k8s/service.yaml -n $KUBE_NAMESPACE
   after_script:
     - NODE_PORT_ENV=$(kubectl get service $CI_PROJECT_PATH_SLUG -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
     - echo "NODE_PORT=$NODE_PORT_ENV" >> deploy.env
@@ -129,7 +129,7 @@ stop_review_apps:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
     - sh .gitlab/runners/entrypoint.sh
   script:
-    - kubectl delete -f src/main/kubernetes/deployment.yaml -n $KUBE_NAMESPACE
-    - kubectl delete -f src/main/kubernetes/service.yaml -n $KUBE_NAMESPACE
+    - kubectl delete -f .k8s/deployment.yaml -n $KUBE_NAMESPACE
+    - kubectl delete -f .k8s/service.yaml -n $KUBE_NAMESPACE
   only:
     - /-release/
