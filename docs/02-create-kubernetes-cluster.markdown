@@ -42,9 +42,10 @@ Sebelum kita install, disini saya mau install dulu commons package seperti `curl
 
 ```bash
 # update system
-yum install -y update && \
-yum install -y net-tools curl wget yum-utils vim tmux && \
-yum install -y device-mapper-persistent-data lvm2 fuse-overlayfs tc
+yum update -y && \
+yum install -y epel-release && \
+yum install -y net-tools curl wget yum-utils vim tmux tc && \
+yum install -y device-mapper-persistent-data lvm2 fuse-overlayfs
 ```
 
 Disable swap partition permanently, edit file `/etc/fstab` comment `/dev/mapper/cl-swap` like this:
