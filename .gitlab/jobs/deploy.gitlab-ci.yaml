@@ -1,4 +1,4 @@
-﻿deploying:
+deploying:
   image:
     name: $CI_REGISTRY_PULL/dimmaryanto93/k8s-kubectl-helm:1.21.1-release
   stage: deploy
@@ -7,8 +7,6 @@
   environment:
     name: production
     url: http://NODE_CLUSTER_IP:$NODE_PORT
-    kubernetes:
-      namespace: $CI_PROJECT_ROOT_NAMESPACE
   when: manual
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
