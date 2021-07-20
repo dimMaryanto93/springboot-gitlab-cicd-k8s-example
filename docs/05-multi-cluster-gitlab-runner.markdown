@@ -36,4 +36,12 @@ Selanjutnya kita kita mau deploy ke stage `production`, kita bisa jalankan `Play
 
 ![production-stage](images/multi-clusters/08-deploying-button.png)
 
+Setelah itu check stage Pipeline `deploying` maka hasilnya akan mendeploy ke kubernetes cluster production yaitu `prod.dimas-maryanto.com` seperti berikut:
 
+![production-pipeline](images/multi-clusters/09-pipeline-deploy-prod.png)
+
+Kemudian kita liat di sisi `Deployments -> Environments -> Production` hasilnya seperti berikut:
+
+![env-production-apps](images/multi-clusters/10-env-production-apps.png)
+
+Jadi kesimpulannya, kita bisa deployment secara otomatis ke environment `development`, `staging`, bahkan `production` dengan sangat simple yaitu menggunakan trigger

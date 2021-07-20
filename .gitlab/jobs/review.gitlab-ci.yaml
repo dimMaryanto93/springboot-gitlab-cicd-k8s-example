@@ -20,6 +20,7 @@ review_apps:
     - NODE_PORT_ENV=$(kubectl get service $CI_PROJECT_PATH_SLUG -n $KUBE_NAMESPACE -o=jsonpath='{.spec.ports[?(@.port==8080)].nodePort}')
     - echo "NODE_PORT=$NODE_PORT_ENV" >> deploy.env
     - echo "NODE_CLUSTER_IP=$NODE_CLUSTER_IP" >> deploy.env
+  allow_failure: true
   artifacts:
     reports:
       dotenv: deploy.env
