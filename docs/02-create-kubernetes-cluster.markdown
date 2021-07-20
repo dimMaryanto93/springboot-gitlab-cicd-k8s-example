@@ -5,29 +5,36 @@ Kita siapkan host yang akan di install kubernetes, sebagai contoh disini saya me
 ```yaml
 Master-Node:
     - NodeName: 'k8s-master'
-      CPU: '2 Cores'
-      RAM: '4 GB'
+      CPU: '2 Cores' or more.
+      RAM: '4 GB' or more
       Storage: '50 GB'
         partision: 
           - / = "20 Gb"
           - /var = "30 Gb"
           - swap = "Disabled"
-      Network: 
+      Network: # Full network connectivity between all machines in the cluster (public or private network is fine).
         - IP4: 'Brige (192.168.88.140)'
-        - hostname: 'k8s-master.example.com'
+        - hostname: 'k8s-cpdev01.dimas-maryanto.com' # Unique hostname, MAC address, and product_uuid for every node.
 Worker-Nodes: 
     - NodeName: 'k8s-worker1'
-      CPU: '2 Cores'
-      RAM: '2 GB'
+      CPU: '2 Cores' or more.
+      RAM: '2 GB' or more.
       Storage: '50 GB'
         partision:
           - / = "20 Gb"
           - /var = "30 Gb"
           - swap = "Disabled"
-      Network: 
+      Network: # Full network connectivity between all machines in the cluster (public or private network is fine).
         - IP4: 'Brige (192.168.88.14x)'
-        - hostname: 'k8s-worker1.example.com'
+        - hostname: 'k8s-wdev01.dimas-maryanto.com' # Unique hostname, MAC address, and product_uuid for every node.
 ```
+
+Verify the MAC address and product_uuid are unique for every node
+
+1. You can get the MAC address of the network interfaces using the command `ip link` or `ifconfig -a`
+2. The product_uuid can be checked by using the command `sudo cat /sys/class/dmi/id/product_uuid`
+
+It is very likely that hardware devices will have unique addresses, although some virtual machines may have identical values. Kubernetes uses these values to uniquely identify the nodes in the cluster. If these values are not unique to each node, the installation process may [fail](https://github.com/kubernetes/kubeadm/issues/31).
 
 ## Setup & install commons package
 
@@ -37,7 +44,7 @@ Sebelum kita install, disini saya mau install dulu commons package seperti `curl
 # update system
 yum install -y update && \
 yum install -y net-tools curl wget yum-utils vim tmux && \
-yum install -y device-mapper-persistent-data lvm2 fuse-overlayfs
+yum install -y device-mapper-persistent-data lvm2 fuse-overlayfs tc
 ```
 
 Disable swap partition permanently, edit file `/etc/fstab` comment `/dev/mapper/cl-swap` like this:
@@ -147,4 +154,68 @@ EOF
 sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes && \
 sudo setenforce 0 && \
 sudo systemctl enable --now kubelet
+```
+
+## Initial kubernetes cluster
+
+The control-plane node is the machine where the control plane components run, including etcd (the cluster database) and the API Server (which the kubectl command line tool communicates with).
+
+Karena disini saya menggunakan banyak network seperti pada `ip addr show up` berikut:
+
+```bash
+ip addr show up
+#1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+#    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+#    inet 127.0.0.1/8 scope host lo
+#       valid_lft forever preferred_lft forever
+#    inet6 ::1/128 scope host
+#       valid_lft forever preferred_lft forever
+#2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+#    link/ether 08:00:27:82:7e:72 brd ff:ff:ff:ff:ff:ff
+#    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+#       valid_lft 85608sec preferred_lft 85608sec
+#    inet6 fe80::af80:fc40:bb9d:a6a/64 scope link noprefixroute
+#       valid_lft forever preferred_lft forever
+#3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+#    link/ether 08:00:27:0b:23:b1 brd ff:ff:ff:ff:ff:ff
+#    inet 192.168.88.140/24 brd 192.168.88.255 scope global noprefixroute enp0s8
+#       valid_lft forever preferred_lft forever
+#    inet6 fe80::7b04:464f:315e:f223/64 scope link dadfailed tentative noprefixroute
+#       valid_lft forever preferred_lft forever
+#    inet6 fe80::deda:2329:2c79:32a8/64 scope link noprefixroute
+#       valid_lft forever preferred_lft forever
+#4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
+#    link/ether 02:42:dd:8a:d8:d6 brd ff:ff:ff:ff:ff:ff
+#    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+#       valid_lft forever preferred_lft forever
+```
+
+Maka saya mau pake IP Address `192.168.xx.xx` maka saya menggunakan network `enp0s8` untuk Network cni `--apiserver-advertise-address`
+
+```bash
+export KUBE_NET_INTERFACE=enp0s8 && \
+kubeadm config images pull && \
+kubeadm init \
+--apiserver-advertise-address=$(ip -f inet a show $KUBE_NET_INTERFACE | grep inet | awk '{ print $2 }' | cut -d/ -f1) \
+--pod-network-cidr=10.244.0.0/16 && \
+mkdir -p $HOME/.kube && \
+sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config && \
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+## Installing Addons Networking and Network Policy
+
+Untuk network plugin and policy, sebetulnya ada banyak implementasinya. bisa di check [disini](https://kubernetes.io/docs/concepts/cluster-administration/addons/) namun di materi kali ini kita akan menggunakan flannel seperti berikut untuk menginstallnya:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+```
+
+## Joining Kubernetes Workers node
+
+Untuk multiple nodes, kita bisa join ke master / control panel dengan perintah yang tadi yaitu
+
+```bash
+kubeadm join 192.168.88.140:6443 --token 6bo11m.i5517ihphsnuuj67 \
+        --discovery-token-ca-cert-hash sha256:9ee47b6f4a02623839c33281a8692ac637f41537913e0baa33b53cddc3647335
 ```
