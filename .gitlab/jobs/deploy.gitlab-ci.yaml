@@ -1,4 +1,4 @@
-deploying:
+﻿deploying:
   image:
     name: $CI_REGISTRY_PULL/dimmaryanto93/k8s-kubectl-helm:1.21.1-release
   stage: deploy
@@ -7,6 +7,8 @@ deploying:
   environment:
     name: production
     url: http://NODE_CLUSTER_IP:$NODE_PORT
+    kubernetes:
+      namespace: $CI_PROJECT_ROOT_NAMESPACE
   when: manual
   before_script:
     - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
@@ -25,24 +27,5 @@ deploying:
     paths:
       - .k8s/
     name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
-  only:
-    - /-release/
-
-stop_review_apps:
-  image:
-    name: $CI_REGISTRY_PULL/dimmaryanto93/k8s-kubectl-helm:1.21.1-release
-  stage: review
-  tags:
-    - docker
-  environment:
-    name: review/$CI_COMMIT_REF_SLUG
-    action: stop
-  when: manual
-  before_script:
-    - kubectl config set-context --current --namespace="$KUBE_NAMESPACE"
-    - sh .gitlab/runners/entrypoint.sh
-  script:
-    - kubectl delete -f .k8s/deployment.yaml -n $KUBE_NAMESPACE
-    - kubectl delete -f .k8s/service.yaml -n $KUBE_NAMESPACE
   only:
     - /-release/
