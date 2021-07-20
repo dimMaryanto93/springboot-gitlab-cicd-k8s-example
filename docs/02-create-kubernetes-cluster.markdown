@@ -221,6 +221,12 @@ kubeadm join 192.168.88.140:6443 --token 6bo11m.i5517ihphsnuuj67 \
         --discovery-token-ca-cert-hash sha256:9ee47b6f4a02623839c33281a8692ac637f41537913e0baa33b53cddc3647335
 ```
 
+Or you can create new token
+
+```bash
+kubeadm token create --print-join-command
+```
+
 ## Control plane node isolation (Optional)
 
 By default, your cluster will not schedule Pods on the control-plane node for security reasons. If you want to be able to schedule Pods on the control-plane node, for example for a single-machine Kubernetes cluster for development, run:
