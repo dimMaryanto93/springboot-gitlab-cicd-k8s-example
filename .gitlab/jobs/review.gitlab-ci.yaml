@@ -5,7 +5,7 @@ review_apps:
   tags:
     - docker
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
+    name: review
     on_stop: stop_review_apps
     url: http://NODE_CLUSTER_IP:$NODE_PORT
     auto_stop_in: 1 week
@@ -36,7 +36,7 @@ stop_review_apps:
   tags:
     - docker
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
+    name: review
     action: stop
   when: manual
   before_script:
