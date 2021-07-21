@@ -11,12 +11,12 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   CI_IMAGE_VERSION: $CI_COMMIT_SHORT_SHA
   MAVEN_CLI_OPTS: "--show-version -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Ddocker-registry-image=${CI_REGISTRY_IMAGE} -Ddocker-registry-host-push=${CI_REGISTRY} -Ddocker-registry-host-pull=${CI_REGISTRY_PULL} -Ddocker-registry-group=${CI_REGISTRY_NAMESPACE}"
-  NODE_CLUSTER_IP: "192.168.88.120"
   DOCKER_REGCRED: "nexus-regcred"
   ## TODO change it, use common name you like!!!
   CI_REGISTRY_IMAGE: "springboot-example"
   CI_REGISTRY_NAMESPACE: "examples/k8s-gitlab-cicd"
   CI_IMAGE_EXPOSE_PORT: 8080
+  NODE_CLUSTER_IP: "192.168.88.120"
 
 cache:
   paths:
