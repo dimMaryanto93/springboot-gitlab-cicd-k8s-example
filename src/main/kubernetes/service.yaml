@@ -5,8 +5,8 @@ metadata:
   name: ${CI_PROJECT_PATH_SLUG}
 spec:
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: ${CI_IMAGE_EXPOSE_PORT}
+      targetPort: ${CI_IMAGE_EXPOSE_PORT}
       name: ${CI_PROJECT_PATH_SLUG}
   selector:
     app: ${CI_PROJECT_PATH_SLUG}
@@ -23,6 +23,6 @@ spec:
       targetPort: 5432
       name: ${CI_PROJECT_PATH_SLUG}-db
   selector:
-    app: ${CI_PROJECT_PATH_SLUG}
-    env: ${CI_ENVIRONMENT_SLUG}
+    app: ${CI_PROJECT_PATH_SLUG}-db
+    env: ${CI_ENVIRONMENT_SLUG}-db
   type: ClusterIP

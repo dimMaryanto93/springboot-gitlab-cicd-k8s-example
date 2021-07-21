@@ -23,7 +23,7 @@ spec:
         - name: ${CI_PROJECT_PATH_SLUG}
           image: ${CI_REGISTRY}/${CI_REGISTRY_NAMESPACE}/${CI_REGISTRY_IMAGE}:${CI_IMAGE_VERSION}
           ports:
-            - containerPort: 8080
+            - containerPort: ${CI_IMAGE_EXPOSE_PORT}
           env:
             - name: DATABASE_HOST
               value: "${CI_PROJECT_PATH_SLUG}-db.${KUBE_NAMESPACE}.svc.cluster.local"
@@ -35,6 +35,8 @@ spec:
               value: "k8s_spring_example"
             - name: DATABASE_PASSWORD
               value: "k8s_spring_example"
+            - name: APPLICATION_PORT
+              value: "${CI_IMAGE_EXPOSE_PORT}"
       imagePullSecrets:
         - name: ${DOCKER_REGCRED}
 ---
@@ -48,13 +50,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: ${CI_PROJECT_PATH_SLUG}
-      env: ${CI_ENVIRONMENT_SLUG}
+      app: ${CI_PROJECT_PATH_SLUG}-db
+      env: ${CI_ENVIRONMENT_SLUG}-db
   template:
     metadata:
       labels:
-        app: ${CI_PROJECT_PATH_SLUG}
-        env: ${CI_ENVIRONMENT_SLUG}
+        app: ${CI_PROJECT_PATH_SLUG}-db
+        env: ${CI_ENVIRONMENT_SLUG}-db
       annotations:
         app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
         app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}

@@ -16,6 +16,7 @@ variables:
   ## TODO change it, use common name you like!!!
   CI_REGISTRY_IMAGE: "springboot-example"
   CI_REGISTRY_NAMESPACE: "examples/k8s-gitlab-cicd"
+  CI_IMAGE_EXPOSE_PORT: 8080
 
 cache:
   paths:
