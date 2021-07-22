@@ -27,7 +27,6 @@ sudo gitlab-runner register \
 -r=${GITLAB_RUNNER_TOKEN} \
 --name=gitlab-runner-docker-executor \
 --non-interactive \
---builds-dir="/builds" \
 --url=${GITLAB_URL} \
 --clone-url=${GITLAB_URL} \
 --executor="docker" \
@@ -36,5 +35,6 @@ sudo gitlab-runner register \
 --docker-oom-kill-disable=false \
 --env="DOCKER_TLS_CERTDIR=" \
 --docker-extra-hosts=${GITLAB_RUNNER_EXTRA_HOST} \
+--docker-privileged=true \
 --tag-list="docker"
 ```
