@@ -17,6 +17,8 @@ Pilih yang mana? ini tergantung dari kebutuhan ada yang ingin semua project pake
 
 ![gitlab-runner-register](images/gitlab-runner/01-gitlab-runner-register.png)
 
+Sekarang kita register, gitlab runner agent ke gitlab dengan menggunakan perintah berikut:
+
 ```bash
 export GITLAB_URL=http://localhost:1234 && \
 export GITLAB_RUNNER_TOKEN=TY2wETK5UiFrXu6vhXHA && \
