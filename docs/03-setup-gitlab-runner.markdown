@@ -34,5 +34,5 @@ sudo gitlab-runner register \
 --docker-oom-kill-disable=false \
 --env="DOCKER_TLS_CERTDIR=" \
 --docker-extra-hosts=${GITLAB_RUNNER_EXTRA_HOST} \
---tag-list=["docker"]
+--tag-list="docker"
 ```
