@@ -25,7 +25,7 @@ sudo gitlab-runner register \
 -r=${GITLAB_RUNNER_TOKEN} \
 --name=gitlab-runner-docker-executor \
 --non-interactive \
---builds-dir="builds" \
+--builds-dir="/builds" \
 --url=${GITLAB_URL} \
 --clone-url=${GITLAB_URL} \
 --executor="docker" \
