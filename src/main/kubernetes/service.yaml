@@ -8,6 +8,7 @@ spec:
     - port: ${CI_IMAGE_EXPOSE_PORT}
       targetPort: ${CI_IMAGE_EXPOSE_PORT}
       name: ${CI_PROJECT_PATH_SLUG}
+      nodePort: ${CI_NODE_PORT_EXPOSE}
   selector:
     app: ${CI_PROJECT_PATH_SLUG}
     env: ${CI_ENVIRONMENT_SLUG}
