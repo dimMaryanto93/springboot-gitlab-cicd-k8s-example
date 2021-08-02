@@ -1,5 +1,5 @@
 docker-publish:
-  stage: publish
+  stage: build
   services:
     - name: $CI_REGISTRY_PULL/docker:18.09-dind
       # Enabled insecure registry into docker inside docker
