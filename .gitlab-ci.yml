@@ -24,9 +24,16 @@ cache:
 
 image: $CI_REGISTRY_PULL/maven:3.6.3-jdk-11
 
-include:
-  - local: .gitlab/jobs/testing.gitlab-ci.yaml
-  - local: .gitlab/jobs/packaging.gitlab-ci.yaml
-  - local: .gitlab/jobs/publish.gitlab-ci.yaml
-  - local: .gitlab/jobs/review.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
-  - local: .gitlab/jobs/deploy.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
+# include:
+#   - local: .gitlab/jobs/testing.gitlab-ci.yaml
+#   - local: .gitlab/jobs/packaging.gitlab-ci.yaml
+#   - local: .gitlab/jobs/publish.gitlab-ci.yaml
+#   - local: .gitlab/jobs/review.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
+#   - local: .gitlab/jobs/deploy.gitlab-ci.yaml # required `publish.gitlab-ci.yaml`
+
+show-variable:
+  script:
+    - export
+  tags:
+    - docker
+  
