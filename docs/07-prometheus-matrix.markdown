@@ -56,6 +56,7 @@ To enable the Prometheus integration for your cluster:
 To View the Monitoring your project:
 
 1. Go to project repository -> Menu -> Monitor -> Metrics
+2. Select **K8s pod health** -> your environment -> select your **Pod name**
 
 hasilnya seperti berikut:
 
