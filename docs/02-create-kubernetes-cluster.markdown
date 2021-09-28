@@ -234,3 +234,8 @@ By default, your cluster will not schedule Pods on the control-plane node for se
 ```bash
 kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
+
+## Adding a ip address to the Kubernetes API Server Certificate
+
+ref: 
+- https://blog.scottlowe.org/2019/07/30/adding-a-name-to-kubernetes-api-server-certificate/
