@@ -42,39 +42,36 @@ Sebelum kita install, disini saya mau install dulu commons package seperti `curl
 
 ```bash
 # update system
-apt-get update && apt-get upgrade -y \
-apt-get update -y net-tools curl wget yum-utils vim tmux && \
-yum install -y device-mapper-persistent-data lvm2 fuse-overlayfs
+apt-get update && apt-get upgrade -y && \
+apt-get install -y net-tools \
+  curl \
+  wget \
+  vim \
+  tmux \
+  apt-transport-https \
+  ca-certificates \
+  gnupg \
+  lsb-release
 ```
 
 Disable swap partition permanently, edit file `/etc/fstab` comment `/dev/mapper/cl-swap` like this:
 
 ```conf
+# /etc/fstab: static file system information.
 #
-# /etc/fstab
-# Created by anaconda on Tue Jul 20 08:07:33 2021
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
 #
-# Accessible filesystems, by reference, are maintained under '/dev/disk/'.
-# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info.
-#
-# After editing this file, run 'systemctl daemon-reload' to update systemd
-# units generated from this file.
-#
-/dev/mapper/cl-root                         /                       xfs     defaults        0 0
-UUID=4ec37475-d403-4466-b2bf-318dfd409092   /boot                   ext4    defaults        1 2
-/dev/mapper/cl-var                          /var                    xfs     defaults        0 0
-#/dev/mapper/cl-swap                        swap                    swap    defaults        0 0
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/ubuntu-vg/ubuntu-lv during curtin installation
+/dev/disk/by-id/dm-uuid-LVM-pLKndmSgBkA5Lk8mWuP7bJc9XiABYFegLL5BawnlKjsJ0EPRyGiKIiprV2ZM1FMI / ext4 defaults 0 1
+# /boot was on /dev/sda2 during curtin installation
+/dev/disk/by-uuid/9306ff44-a2d1-4d49-a7a3-b9278929a3e3 /boot ext4 defaults 0 1
+#/swap.img      none    swap    sw      0       0
 ```
 
-Setelah itu kita set selinux = `permissive` dengan mengedit file `/etc/selinux/config` 
-
-```bash
-sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config && \
-systemctl disable firewalld && \
-systemctl stop firewalld
-```
-
-Kemudian `reboot` . 
+Kemudian `reboot`. 
 
 Setelah itu kita setup untuk networking (iptables) di kubernetes.
 
@@ -102,10 +99,19 @@ sudo sysctl --system
 Install the `yum-utils` package (which provides the yum-config-manager utility) and set up the stable repository.
 
 ```bash
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo && \
-yum install -y docker-ce docker-ce-cli containerd.io && \
+## add docker official gpg key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+## add docker repo
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+## install docker-ce
+apt-get update && \
+apt-get -y install docker-ce docker-ce-cli containerd.io
+
+## configure daemon
 sudo mkdir -p /etc/docker && \
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
@@ -137,23 +143,19 @@ You will install these packages on all of your machines:
 2. `kubelet`: the component that runs on all of the machines in your cluster and does things like starting pods and containers. 
 3. `kubectl`: the command line util to talk to your cluster.
 
-Kita bisa menggunakan package manager Red Hat-based distribution seperti berikut:
+Kita bisa menggunakan package manager Debian distribution seperti berikut:
 
 ```bash
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kubelet kubeadm kubectl
-EOF
+## add google cloud public signing key
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
-sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes && \
-sudo setenforce 0 && \
-sudo systemctl enable --now kubelet
+
+## add kubernetes apt repository
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+apt-get update && \
+apt-get install -y kubelet kubeadm kubectl && \
+apt-mark hold kubelet kubeadm kubectl
 ```
 
 ## Initial kubernetes cluster
@@ -163,31 +165,11 @@ The control-plane node is the machine where the control plane components run, in
 Karena disini saya menggunakan banyak network seperti pada `ip addr show up` berikut:
 
 ```bash
-ip addr show up
-#1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
-#    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-#    inet 127.0.0.1/8 scope host lo
-#       valid_lft forever preferred_lft forever
-#    inet6 ::1/128 scope host
-#       valid_lft forever preferred_lft forever
-#2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-#    link/ether 08:00:27:82:7e:72 brd ff:ff:ff:ff:ff:ff
-#    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
-#       valid_lft 85608sec preferred_lft 85608sec
-#    inet6 fe80::af80:fc40:bb9d:a6a/64 scope link noprefixroute
-#       valid_lft forever preferred_lft forever
-#3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-#    link/ether 08:00:27:0b:23:b1 brd ff:ff:ff:ff:ff:ff
-#    inet 192.168.88.140/24 brd 192.168.88.255 scope global noprefixroute enp0s8
-#       valid_lft forever preferred_lft forever
-#    inet6 fe80::7b04:464f:315e:f223/64 scope link dadfailed tentative noprefixroute
-#       valid_lft forever preferred_lft forever
-#    inet6 fe80::deda:2329:2c79:32a8/64 scope link noprefixroute
-#       valid_lft forever preferred_lft forever
-#4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default
-#    link/ether 02:42:dd:8a:d8:d6 brd ff:ff:ff:ff:ff:ff
-#    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
-#       valid_lft forever preferred_lft forever
+root@k8s-vm-ubuntu:~# ip a | grep enp
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic enp0s3
+3: enp0s8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 192.168.100.48/24 brd 192.168.100.255 scope global dynamic enp0s8
 ```
 
 Maka saya mau pake IP Address `192.168.xx.xx` maka saya menggunakan network `enp0s8` untuk Network cni `--apiserver-advertise-address`
