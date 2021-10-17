@@ -1,0 +1,3 @@
+[submodule "ansible-kubernetes"]
+	path = .ansible/kubernetes
+	url = git@repository.dimas-maryanto.com:examples/ansible/ansible-kubernetes-example.git
