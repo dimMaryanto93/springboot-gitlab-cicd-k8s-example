@@ -1,0 +1,6 @@
+---
+- name: Install docker-ce
+  hosts: ["dockerd"]
+  become: true
+  roles: 
+    - dimmaryanto93.docker
